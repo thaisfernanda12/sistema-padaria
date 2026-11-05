@@ -12,7 +12,8 @@ def criar_tabela():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL,
             preco REAL NOT NULL,
-            quantidade INTEGER NOT NULL
+            quantidade INTEGER NOT NULL,
+            estoque_minimo INTEGER NOT NULL DEFAULT 5
         )
     """)
 
@@ -26,6 +27,16 @@ def criar_tabela():
             FOREIGN KEY (produto_id) REFERENCES produtos(id)
         )
     """)
+
+    colunas = [coluna[1] for coluna in cursor.execute(
+        "PRAGMA table_info(produtos)"
+    ).fetchall()]
+
+    if "estoque_minimo" not in colunas:
+        cursor.execute("""
+            ALTER TABLE produtos
+            ADD COLUMN estoque_minimo INTEGER NOT NULL DEFAULT 5
+        """)
 
     conexao.commit()
     conexao.close()

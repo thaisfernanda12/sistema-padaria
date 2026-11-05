@@ -19,13 +19,20 @@ def produtos():
         nome = request.form["nome"]
         preco = float(request.form["preco"])
         quantidade = int(request.form["quantidade"])
+        estoque_minimo = int(request.form["estoque_minimo"])
+
+        if preco < 0 or quantidade < 0 or estoque_minimo < 0:
+            return "Os valores não podem ser negativos."
 
         conexao = conectar()
         cursor = conexao.cursor()
-        cursor.execute(
-            "INSERT INTO produtos (nome, preco, quantidade) VALUES (?, ?, ?)",
-            (nome, preco, quantidade)
-        )
+
+        cursor.execute("""
+            INSERT INTO produtos
+            (nome, preco, quantidade, estoque_minimo)
+            VALUES (?, ?, ?, ?)
+        """, (nome, preco, quantidade, estoque_minimo))
+
         conexao.commit()
         conexao.close()
 
@@ -39,22 +46,38 @@ def produtos():
 
     return render_template_string("""
         <h1>Cadastro de Produtos</h1>
+
         <form method="POST">
             <p>Nome:</p>
             <input name="nome" required>
+
             <p>Preço:</p>
             <input name="preco" type="number" step="0.01" min="0" required>
+
             <p>Quantidade:</p>
             <input name="quantidade" type="number" min="0" required>
+
+            <p>Estoque mínimo:</p>
+            <input name="estoque_minimo" type="number"
+                   min="0" value="5" required>
+
             <br><br>
             <button type="submit">Cadastrar produto</button>
         </form>
 
         <h2>Estoque</h2>
+
         {% for produto in lista %}
-            <p>{{ produto[1] }} - R$ {{ "%.2f"|format(produto[2]) }}
-            - Quantidade: {{ produto[3] }}</p>
+            <p>
+                {{ produto[1] }} -
+                R$ {{ "%.2f"|format(produto[2]) }} -
+                Quantidade: {{ produto[3] }}
+                {% if produto[3] <= produto[4] %}
+                    ⚠️ ESTOQUE BAIXO!
+                {% endif %}
+            </p>
         {% endfor %}
+
         <a href="/">Voltar</a>
     """, lista=lista)
 
