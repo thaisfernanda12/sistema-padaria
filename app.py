@@ -1,17 +1,22 @@
+
 from flask import Flask, request, redirect, render_template_string
 from database import criar_tabela, conectar
 from datetime import datetime
 
 app = Flask(__name__)
 
+
 @app.route("/")
 def inicio():
     return """
     <h1>🥖 Padaria Pão Quentinho</h1>
     <h2>Sistema de Estoque e Vendas</h2>
+
     <p><a href="/produtos">Cadastrar e consultar produtos</a></p>
     <p><a href="/vendas">Registrar venda</a></p>
+    <p><a href="/historico">Consultar histórico de vendas</a></p>
     """
+
 
 @app.route("/produtos", methods=["GET", "POST"])
 def produtos():
@@ -72,6 +77,7 @@ def produtos():
                 {{ produto[1] }} -
                 R$ {{ "%.2f"|format(produto[2]) }} -
                 Quantidade: {{ produto[3] }}
+
                 {% if produto[3] <= produto[4] %}
                     ⚠️ ESTOQUE BAIXO!
                 {% endif %}
@@ -134,6 +140,7 @@ def vendas():
             <p>Total: R$ {total:.2f}</p>
             <a href="/vendas">Nova venda</a>
             <br><a href="/produtos">Consultar estoque</a>
+            <br><a href="/historico">Histórico de vendas</a>
             <br><a href="/">Início</a>
         """
 
@@ -146,6 +153,7 @@ def vendas():
 
         <form method="POST">
             <p>Produto:</p>
+
             <select name="produto_id" required>
                 {% for produto in lista %}
                     <option value="{{ produto[0] }}">
@@ -163,6 +171,42 @@ def vendas():
         </form>
 
         <a href="/">Voltar</a>
+    """, lista=lista)
+
+
+@app.route("/historico")
+def historico():
+    conexao = conectar()
+    cursor = conexao.cursor()
+
+    cursor.execute("""
+        SELECT vendas.id, produtos.nome,
+               vendas.quantidade, vendas.valor_total,
+               vendas.data_venda
+        FROM vendas
+        JOIN produtos ON vendas.produto_id = produtos.id
+        ORDER BY vendas.id DESC
+    """)
+
+    lista = cursor.fetchall()
+    conexao.close()
+
+    return render_template_string("""
+        <h1>Histórico de Vendas</h1>
+
+        {% for venda in lista %}
+            <p>
+                Venda nº {{ venda[0] }} -
+                {{ venda[1] }} -
+                Quantidade: {{ venda[2] }} -
+                Total: R$ {{ "%.2f"|format(venda[3]) }} -
+                Data: {{ venda[4] }}
+            </p>
+        {% else %}
+            <p>Nenhuma venda registrada.</p>
+        {% endfor %}
+
+        <a href="/">Voltar ao início</a>
     """, lista=lista)
 
 
