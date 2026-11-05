@@ -21,7 +21,11 @@ def inicio():
 @app.route("/produtos", methods=["GET", "POST"])
 def produtos():
     if request.method == "POST":
-        nome = request.form["nome"]
+        nome = request.form["nome"].strip()
+
+        if not nome:
+            return "O nome do produto não pode ficar vazio."
+
         preco = float(request.form["preco"])
         quantidade = int(request.form["quantidade"])
         estoque_minimo = int(request.form["estoque_minimo"])
