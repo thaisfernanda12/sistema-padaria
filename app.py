@@ -1,5 +1,5 @@
 
-from flask import Flask, request, redirect, render_template_string
+from flask import Flask, request, redirect, render_template, render_template_string
 from database import criar_tabela, conectar
 from datetime import datetime
 
@@ -8,14 +8,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def inicio():
-    return """
-    <h1>🥖 Padaria Pão Quentinho</h1>
-    <h2>Sistema de Estoque e Vendas</h2>
-
-    <p><a href="/produtos">Cadastrar e consultar produtos</a></p>
-    <p><a href="/vendas">Registrar venda</a></p>
-    <p><a href="/historico">Consultar histórico de vendas</a></p>
-    """
+    return render_template("index.html")
 
 
 @app.route("/produtos", methods=["GET", "POST"])
@@ -54,42 +47,102 @@ def produtos():
     conexao.close()
 
     return render_template_string("""
-        <h1>Cadastro de Produtos</h1>
+    <style>
+        body {
+            font-family: Arial;
+            background: #faf5ed;
+            color: #493323;
+            padding: 30px;
+        }
 
-        <form method="POST">
-            <p>Nome:</p>
-            <input name="nome" required>
+        h1, h2 {
+            color: #70452f;
+        }
 
-            <p>Preço:</p>
-            <input name="preco" type="number" step="0.01" min="0" required>
+        input, button {
+            padding: 10px;
+            margin: 5px;
+        }
 
-            <p>Quantidade:</p>
-            <input name="quantidade" type="number" min="0" required>
+        button {
+            background: #a95f35;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
 
-            <p>Estoque mínimo:</p>
-            <input name="estoque_minimo" type="number"
-                   min="0" value="5" required>
+        table {
+            background: white;
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
 
-            <br><br>
-            <button type="submit">Cadastrar produto</button>
-        </form>
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
 
-        <h2>Estoque</h2>
+        th {
+            background: #70452f;
+            color: white;
+        }
+
+        a {
+            color: #70452f;
+        }
+    </style>
+
+    <h1>Cadastro de Produtos</h1>
+
+    <form method="POST">
+        <p>Nome:</p>
+        <input name="nome" required>
+
+        <p>Preço:</p>
+        <input name="preco" type="number" step="0.01" min="0" required>
+
+        <p>Quantidade:</p>
+        <input name="quantidade" type="number" min="0" required>
+
+        <p>Estoque mínimo:</p>
+        <input name="estoque_minimo" type="number" min="0" value="5" required>
+
+        <br>
+        <button type="submit">Cadastrar produto</button>
+    </form>
+
+    <h2>Estoque de Produtos</h2>
+
+    <table>
+        <tr>
+            <th>Produto</th>
+            <th>Preço</th>
+            <th>Quantidade</th>
+            <th>Situação</th>
+        </tr>
 
         {% for produto in lista %}
-            <p>
-                {{ produto[1] }} -
-                R$ {{ "%.2f"|format(produto[2]) }} -
-                Quantidade: {{ produto[3] }}
-
+        <tr>
+            <td>{{ produto[1] }}</td>
+            <td>R$ {{ "%.2f"|format(produto[2]) }}</td>
+            <td>{{ produto[3] }}</td>
+            <td>
                 {% if produto[3] <= produto[4] %}
-                    ⚠️ ESTOQUE BAIXO!
+                    Estoque baixo!
+                {% else %}
+                    Disponível
                 {% endif %}
-            </p>
+            </td>
+        </tr>
         {% endfor %}
+    </table>
 
-        <a href="/">Voltar</a>
-    """, lista=lista)
+    <br>
+    <a href="/">Voltar ao início</a>
+
+""", lista=lista)
 
 
 @app.route("/vendas", methods=["GET", "POST"])
@@ -138,14 +191,47 @@ def vendas():
         conexao.close()
 
         return f"""
-            <h1>Venda realizada com sucesso!</h1>
-            <p>Produto: {nome}</p>
-            <p>Quantidade: {quantidade}</p>
-            <p>Total: R$ {total:.2f}</p>
-            <a href="/vendas">Nova venda</a>
-            <br><a href="/produtos">Consultar estoque</a>
-            <br><a href="/historico">Histórico de vendas</a>
-            <br><a href="/">Início</a>
+    <style>
+        body {{
+            font-family: Arial;
+            background: #faf5ed;
+            color: #493323;
+            padding: 30px;
+        }}
+
+        .card {{
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+        }}
+
+        h1 {{
+            color: #70452f;
+        }}
+
+        a {{
+            display: inline-block;
+            color: white;
+            background: #a95f35;
+            padding: 10px 15px;
+            margin: 8px 5px 0 0;
+            border-radius: 6px;
+            text-decoration: none;
+        }}
+    </style>
+
+    <div class="card">
+        <h1>✓ Venda realizada com sucesso!</h1>
+        <p>Produto: {nome}</p>
+        <p>Quantidade: {quantidade}</p>
+        <p>Total: R$ {total:.2f}</p>
+
+        <a href="/vendas">Nova venda</a>
+        <a href="/produtos">Consultar estoque</a>
+        <a href="/historico">Histórico de vendas</a>
+        <a href="/">Início</a>
+    </div>
         """
 
     cursor.execute("SELECT id, nome, preco, quantidade FROM produtos")
@@ -153,29 +239,69 @@ def vendas():
     conexao.close()
 
     return render_template_string("""
-        <h1>Registrar Venda</h1>
+    <style>
+        body {
+            font-family: Arial;
+            background: #faf5ed;
+            color: #493323;
+            padding: 30px;
+        }
 
-        <form method="POST">
-            <p>Produto:</p>
+        h1 {
+            color: #70452f;
+        }
 
-            <select name="produto_id" required>
-                {% for produto in lista %}
-                    <option value="{{ produto[0] }}">
-                        {{ produto[1] }} - R$ {{ "%.2f"|format(produto[2]) }}
-                        (Estoque: {{ produto[3] }})
-                    </option>
-                {% endfor %}
-            </select>
+        form {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 450px;
+        }
 
-            <p>Quantidade:</p>
-            <input type="number" name="quantidade" min="1" required>
+        input, select, button {
+            padding: 12px;
+            margin: 8px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
 
-            <br><br>
-            <button type="submit">Finalizar venda</button>
-        </form>
+        button {
+            background: #a95f35;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
 
-        <a href="/">Voltar</a>
-    """, lista=lista)
+        a {
+            color: #70452f;
+        }
+    </style>
+
+    <h1>🛒 Registrar Venda</h1>
+
+    <form method="POST">
+        <label>Produto:</label>
+
+        <select name="produto_id" required>
+            {% for produto in lista %}
+                <option value="{{ produto[0] }}">
+                    {{ produto[1] }} - R$ {{ "%.2f"|format(produto[2]) }}
+                    (Estoque: {{ produto[3] }})
+                </option>
+            {% endfor %}
+        </select>
+
+        <label>Quantidade:</label>
+        <input type="number" name="quantidade" min="1" required>
+
+        <button type="submit">Finalizar venda</button>
+    </form>
+
+    <br>
+    <a href="/">Voltar ao início</a>
+
+""", lista=lista)
 
 
 @app.route("/historico")
@@ -196,22 +322,48 @@ def historico():
     conexao.close()
 
     return render_template_string("""
-        <h1>Histórico de Vendas</h1>
+    <style>
+        body {
+            font-family: Arial;
+            background: #faf5ed;
+            color: #493323;
+            padding: 30px;
+        }
 
-        {% for venda in lista %}
-            <p>
-                Venda nº {{ venda[0] }} -
-                {{ venda[1] }} -
-                Quantidade: {{ venda[2] }} -
-                Total: R$ {{ "%.2f"|format(venda[3]) }} -
-                Data: {{ venda[4] }}
-            </p>
-        {% else %}
-            <p>Nenhuma venda registrada.</p>
-        {% endfor %}
+        h1 {
+            color: #70452f;
+        }
 
-        <a href="/">Voltar ao início</a>
-    """, lista=lista)
+        .venda {
+            background: white;
+            padding: 18px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+        }
+
+        a {
+            color: #70452f;
+        }
+    </style>
+
+    <h1>📋 Histórico de Vendas</h1>
+
+    {% for venda in lista %}
+        <div class="venda">
+            <strong>Venda nº {{ venda[0] }}</strong>
+            <p>Produto: {{ venda[1] }}</p>
+            <p>Quantidade: {{ venda[2] }}</p>
+            <p>Total: R$ {{ "%.2f"|format(venda[3]) }}</p>
+            <p>Data: {{ venda[4] }}</p>
+        </div>
+    {% else %}
+        <p>Nenhuma venda registrada.</p>
+    {% endfor %}
+
+    <br>
+    <a href="/">Voltar ao início</a>
+
+""", lista=lista)
 
 
 if __name__ == "__main__":
