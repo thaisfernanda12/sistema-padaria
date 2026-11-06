@@ -1,0 +1,153 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Padaria Pão Quentinho</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #faf5ed;
+            color: #493323;
+        }
+
+        header {
+            background: #70452f;
+            color: white;
+            padding: 25px 40px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+
+        header p {
+            color: #f4dfc8;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .boas-vindas {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border-left: 6px solid #c77b43;
+        }
+
+        .boas-vindas h2 {
+            margin-bottom: 10px;
+        }
+
+        .menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #00000010;
+        }
+
+        .card h3 {
+            color: #70452f;
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            color: #66584d;
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+
+        .botao {
+            display: inline-block;
+            background: #a95f35;
+            color: white;
+            padding: 11px 17px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .botao:hover {
+            background: #70452f;
+        }
+
+        .botao:focus-visible {
+            outline: 3px solid #222;
+            outline-offset: 4px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #66584d;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>🥐 Padaria Pão Quentinho</h1>
+        <p>Sistema de Controle de Estoque e Vendas</p>
+    </header>
+
+    <main>
+        <section class="boas-vindas">
+            <h2>Bem-vindo ao sistema!</h2>
+            <p>Gerencie seus produtos, acompanhe o estoque e registre suas vendas em um só lugar.</p>
+        </section>
+
+        <section class="menu" aria-label="Menu principal">
+
+            <article class="card">
+                <h3>📦 Produtos e estoque</h3>
+                <p>Consulte os produtos cadastrados e suas quantidades disponíveis.</p>
+                <a class="botao" href="/produtos">Consultar estoque</a>
+            </article>
+
+            <article class="card">
+                <h3>➕ Cadastrar produto</h3>
+                <p>Adicione novos produtos ao estoque da padaria.</p>
+                <a class="botao" href="/produtos">Cadastrar produto</a>
+            </article>
+
+            <article class="card">
+                <h3>🛒 Registrar venda</h3>
+                <p>Registre vendas e atualize automaticamente o estoque.</p>
+                <a class="botao" href="/vendas">Registrar venda</a>
+            </article>
+
+            <article class="card">
+                <h3>📋 Histórico de vendas</h3>
+                <p>Consulte as vendas que já foram realizadas.</p>
+                <a class="botao" href="/historico">Ver histórico</a>
+            </article>
+
+        </section>
+    </main>
+
+    <footer>
+        <p>Padaria Pão Quentinho — Organização e qualidade todos os dias.</p>
+    </footer>
+
+</body>
+</html>
